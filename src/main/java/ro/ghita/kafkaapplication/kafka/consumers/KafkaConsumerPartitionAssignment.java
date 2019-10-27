@@ -6,6 +6,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.errors.WakeupException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Properties;
 
@@ -24,16 +25,16 @@ public class KafkaConsumerPartitionAssignment {
         consumer.assignment().forEach(topicPartition -> {
             System.out.println(topicPartition.topic() + " " + topicPartition.partition());
         });
+
         try {
             while (true) {
-                ConsumerRecords<String, String> records = consumer.poll(Long.MAX_VALUE);
+                ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(Integer.MAX_VALUE));
                 for (ConsumerRecord<String, String> record : records)
                     System.out.println(record.offset() + ": " + record.value());
 
 
-                consumer.assignment().forEach(topicPartition -> {
-                    System.out.println("      "  +  topicPartition.topic() + " " + topicPartition.partition());
-                });
+                consumer.assignment().forEach(topicPartition ->
+                        System.out.println("      "  +  topicPartition.topic() + " " + topicPartition.partition()));
             }
         } catch (WakeupException e) {
             // ignore for shutdown
